@@ -38,7 +38,7 @@ public class PrimitiveTests
         };
         var xmlSerializer = new MmcSerializer(xmlAdapter, UniversalMmcOptions);
 
-        var intOnly = new IntegersOnly(12, 20);
+        var intOnly = new IntegersOnly(12, 20, 300, 5432678);
 
         xmlSerializer.Serialize(intOnly);
 
