@@ -1,6 +1,9 @@
 ﻿using MmcSerializer.Adapters;
+using MmcSerializer.Attributes;
 using MmcSerializer.Exceptions;
+using MmcSerializer.Extensions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace MmcSerializer
 {
@@ -36,35 +39,99 @@ namespace MmcSerializer
 
             var type = o.GetType();
 
-            var nodeName = type.AssemblyQualifiedName ?? type.FullName ?? type.Name;
+            var typeCategory = type.GetTypeCategory();
 
-            SerializationNode rootNode = new SerializationNode(nodeName, o);
+            if (typeCategory != TypeCategory.Struct && typeCategory != TypeCategory.Class) throw new InvalidObjectSerializationException(typeCategory);
 
-            var propInfos = GetValidPropertiesForObject(o);
-            var fieldInfos = GetValidFieldsForObject(o);
+            var nodeName = type.Name;
+
+            SerializationNode rootNode = new SerializationNode(nodeName, o, type, type.GetTypeCategory());
+
+            var propInfos = GetValidPropertiesForObjectSerialization(o);
+            var fieldInfos = GetValidFieldsForObjectSerialization(o);
 
             foreach (var fieldInfo in fieldInfos)
             {
-                InternalSerialize(fieldInfo, rootNode);
+                HandleFieldSerialization(fieldInfo, rootNode);
             }
 
             foreach (var propInfo in propInfos)
             {
-                InternalSerialize(propInfo, rootNode);
+                HandlePropertySerialization(propInfo, rootNode);
+            }
+
+            Adapter.Serialize(rootNode);
+        }
+
+        protected virtual void HandlePropertySerialization(PropertyInfo propertyInfo, SerializationNode parentNode)
+        {
+            Type propType = propertyInfo.PropertyType;
+
+            string name = propertyInfo.GetCustomAttribute<MmcSerializeAsAttribute>()?.Name ?? propertyInfo.Name;
+
+            object? value = propertyInfo.GetValue(parentNode.Value);
+
+            HandleSerialization(name, value, propType, parentNode);
+        }
+
+        protected virtual void HandleFieldSerialization(FieldInfo fieldInfo, SerializationNode parentNode)
+        {
+            Type fieldType = fieldInfo.FieldType;
+
+            string name = fieldInfo.GetCustomAttribute<MmcSerializeAsAttribute>()?.Name ?? fieldInfo.Name;
+
+            object? value = fieldInfo.GetValue(parentNode.Value);
+
+            TypeCategory typeCategory = fieldType.GetTypeCategory();
+
+            HandleSerialization(name, value, fieldType, parentNode);
+        }
+
+        protected virtual void HandleSerialization(string name, object? value, Type type, SerializationNode parentNode)
+        {
+            TypeCategory typeCategory = type.GetTypeCategory();
+
+            switch (typeCategory)
+            {
+                case TypeCategory.Class:
+                    SerializeClassType(name, value, type, parentNode);
+                    break;
+
+                case TypeCategory.Primitive:
+                case TypeCategory.NullablePrimitive:
+                    SerializePrimitiveType(name, value, type, typeCategory, parentNode);
+                    break;
             }
         }
 
-        protected virtual void InternalSerialize(PropertyInfo propInfo, SerializationNode parentNode)
+        protected virtual void SerializeClassType(string name, object? value, Type type, SerializationNode parentNode)
         {
-            // TODO: use recursion to build tree
+            SerializationNode childNode = new SerializationNode(name, value, type, TypeCategory.Class);
+
+            parentNode.AddChildNode(childNode);
+
+            var propInfos = GetValidPropertiesForObjectSerialization(value);
+            var fieldInfos = GetValidFieldsForObjectSerialization(value);
+
+            foreach (var fieldInfo in fieldInfos)
+            {
+                HandleFieldSerialization(fieldInfo, childNode);
+            }
+
+            foreach (var propInfo in propInfos)
+            {
+                HandlePropertySerialization(propInfo, childNode);
+            }
         }
 
-        protected virtual void InternalSerialize(FieldInfo fieldInfo, SerializationNode parentNode)
+        protected virtual void SerializePrimitiveType(string name, object? value, Type type, TypeCategory typeCategory, SerializationNode parentNode)
         {
-            // TODO: use recursion to build tree
+            SerializationNode childNode = new SerializationNode(name, value, type, typeCategory);
+
+            parentNode.AddChildNode(childNode);
         }
 
-        protected virtual PropertyInfo[] GetValidPropertiesForObject(object? o)
+        protected virtual PropertyInfo[] GetValidPropertiesForObjectSerialization(object? o)
         {
             if (o == null) return [];
 
@@ -75,15 +142,18 @@ namespace MmcSerializer
             return propInfo;
         }
 
-        protected virtual FieldInfo[] GetValidFieldsForObject(object? o)
+        protected virtual FieldInfo[] GetValidFieldsForObjectSerialization(object? o)
         {
             if (o == null) return [];
 
             var type = o.GetType();
 
-            var fieldInfo = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            var allFields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
-            return fieldInfo;
+            // finally remove any compiler generated fields like backing fields for auto properties
+            var validFields = allFields.Where(f => !f.IsDefined(typeof(CompilerGeneratedAttribute), inherit: false)).ToArray();
+
+            return validFields;
         }
 
         /// <summary>
@@ -92,7 +162,129 @@ namespace MmcSerializer
         /// <returns>Nullable deserialized object</returns>
         public virtual object? Deserialize()
         {
-            throw new NotImplementedException(); // TODO: use adapter to deserialize into a SerializationNode tree and then handle reflection here
+            SerializationNode? rootNode = Adapter.Deserialize();
+
+            if (rootNode == null) return null;
+
+            TypeCategory typeCategory = rootNode.TypeCategory;
+
+            if (typeCategory == TypeCategory.Class)
+            {
+                DeserializeClassType(rootNode, null, (parameters) =>
+                {
+                    if (parameters != null && parameters.Length == 1)
+                    {
+                        rootNode.Value = parameters[0];
+                    }
+                });
+            }
+            else if (typeCategory == TypeCategory.Struct)
+            {
+
+            }
+
+            return rootNode.Value;
+        }
+
+        protected virtual void DeserializeClassType(SerializationNode currentNode, SerializationNode? parentNode, Action<object?[]?> setter)
+        {
+            Type classType = currentNode.Type;
+
+            object? instance = Activator.CreateInstance(classType);
+
+            setter.Invoke([instance]);
+
+            Dictionary<string, PropertyInfo> propInfos = [];
+            Dictionary<string, FieldInfo> fieldInfos = [];
+
+            foreach (var propInfo in GetValidPropertiesForObjectDeserialization(instance))
+            {
+                var hasCustomName = propInfo.IsDefined(typeof(MmcSerializeAsAttribute), inherit: false);
+
+                var propertyName = propInfo.Name;
+
+                var name = hasCustomName ? propInfo.GetCustomAttribute<MmcSerializeAsAttribute>()?.Name ?? propertyName : propertyName;
+
+                propInfos.Add(name, propInfo);
+            }
+
+            foreach (var fieldInfo in GetValidFieldsForObjectDeserialization(instance))
+            {
+                var hasCustomName = fieldInfo.IsDefined(typeof(MmcSerializeAsAttribute), inherit: false);
+
+                var fieldName = fieldInfo.Name;
+
+                var name = hasCustomName ? fieldInfo.GetCustomAttribute<MmcSerializeAsAttribute>()?.Name ?? fieldName : fieldName;
+
+                fieldInfos.Add(name, fieldInfo);
+            }
+
+            var nextChildNode = currentNode.GetNextChildNode();
+            while (nextChildNode != null)
+            {
+                Action<object?[]?>? newSetter = null;
+
+                if (propInfos.TryGetValue(nextChildNode.Name, out PropertyInfo? propertyInfo))
+                {
+                    newSetter = (parameters) => propertyInfo.SetMethod?.Invoke(instance, parameters);
+                }
+                else if (fieldInfos.TryGetValue(nextChildNode.Name, out FieldInfo? fieldInfo))
+                {
+                    newSetter = (parameters) => fieldInfo.SetValue(instance, parameters?[0] ?? null);
+                }
+
+                if (newSetter != null)
+                {
+                    switch (nextChildNode.TypeCategory)
+                    {
+                        case TypeCategory.Class:
+                            DeserializeClassType(nextChildNode, currentNode, newSetter);
+                            break;
+
+                        case TypeCategory.Primitive:
+                        case TypeCategory.NullablePrimitive:
+                            DeserializePrimitiveType(nextChildNode, currentNode, newSetter);
+                            break;
+                    }
+                }
+
+                nextChildNode = currentNode.GetNextChildNode();
+            }
+        }
+
+        protected virtual void DeserializePrimitiveType(SerializationNode currentNode, SerializationNode? parentNode, Action<object?[]?> setter)
+        {
+            if (currentNode.Value is string stringValue)
+            {
+                object? convertedType = Convert.ChangeType(stringValue, currentNode.Type);
+
+                setter.Invoke([convertedType]);
+            }
+        }
+
+        protected virtual PropertyInfo[] GetValidPropertiesForObjectDeserialization(object? o)
+        {
+            if (o == null) return [];
+
+            var type = o.GetType();
+
+            var propInfo = type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+            return propInfo;
+        }
+
+        protected virtual FieldInfo[] GetValidFieldsForObjectDeserialization(object? o)
+        {
+            if (o == null) return [];
+
+            var type = o.GetType();
+
+            var allFields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+            // finally remove any compiler generated fields like backing fields for auto properties
+            var validFields = allFields.Where(f => !f.IsDefined(typeof(CompilerGeneratedAttribute), inherit: false)).ToArray();
+
+            return validFields;
         }
     }
 }
