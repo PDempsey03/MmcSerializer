@@ -256,7 +256,26 @@ namespace MmcSerializer
         {
             if (currentNode.Value is string stringValue)
             {
-                object? convertedType = Convert.ChangeType(stringValue, currentNode.Type);
+                object? convertedType;
+
+                if (currentNode.Type == typeof(nint))
+                {
+                    if (long.TryParse(stringValue, out long parsedLong))
+                        convertedType = new IntPtr(parsedLong);
+                    else
+                        convertedType = default(nint);
+                }
+                else if (currentNode.Type == typeof(nuint))
+                {
+                    if (ulong.TryParse(stringValue, out ulong parsedUlong))
+                        convertedType = new UIntPtr(parsedUlong);
+                    else
+                        convertedType = default(nuint);
+                }
+                else
+                {
+                    convertedType = Convert.ChangeType(stringValue, currentNode.Type);
+                }
 
                 setter.Invoke([convertedType]);
             }
