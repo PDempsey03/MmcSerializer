@@ -38,12 +38,13 @@ jobs:
         - name: Pack
           run: |
             dotnet pack ./src/MmcSerializer.csproj -c Release -o .output
+            ls -l .output/
         
-        - name: Publish
-          env: 
-            API_KEY: ${{ secrets.NUGET_API_KEY }}
-          run: |
-            dotnet nuget push .output/*.nupkg --api-key $API_KEY --source https://api.nuget.org/v3/index.json
+        #- name: Publish
+        #  env: 
+        #    API_KEY: ${{ secrets.NUGET_API_KEY }}
+        #  run: |
+        #    dotnet nuget push .output/*.nupkg --api-key $API_KEY --source https://api.nuget.org/v3/index.json
 
         - name: Upload package as artifact
           uses: actions/upload-artifact@v4
@@ -64,14 +65,18 @@ jobs:
           name: nuget-package
           path: ./artifacts
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
-          body: |
-            Published NuGet package for version ${{ github.ref_name }}.
-          files: |
-            ./artifacts/*.nupkg
+      - name: Check Artifact Path
+        run: |
+            ls -l ./artifacts
+
+      #- name: Create GitHub Release
+      #  uses: softprops/action-gh-release@v1
+      #  with:
+      #    tag_name: ${{ github.ref_name }}
+      #    name: Release ${{ github.ref_name }}
+      #    body: |
+      #      Published NuGet package for version ${{ github.ref_name }}.
+      #    files: |
+      #      ./artifacts/*.nupkg
     
     
