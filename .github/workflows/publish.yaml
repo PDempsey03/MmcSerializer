@@ -17,7 +17,7 @@ jobs:
         - name: Set Version
           run: |
             VERSION=${ github.ref_name#v }
-            sed -i -e 's/{{Version}}/${VERSION}/' ./src/MmcSerializer.csproj
+            sed -i -e "s/{{Version}}/${VERSION}/" ./src/MmcSerializer.csproj
         
         - name: Pack
           run: |
@@ -30,7 +30,7 @@ jobs:
             dotnet nuget push .output/*.nupkg --api-key $API_KEY --source https://api.nuget.org/v3/index.json
 
   publish_github_release:
-    name: Punlish Github Release
+    name: Publish Github Release
 
     runs-on: ubuntu-latest
 
