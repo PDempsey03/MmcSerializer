@@ -11,6 +11,11 @@
 	  <Authors>Patrick Dempsey</Authors>
 	  <Company>Mmc</Company>
 	  <Product>MmcSolutions</Product>
+	  <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+
+	<ItemGroup>
+		<None Include="README.md" Pack="true" PackagePath="" />
+	</ItemGroup>
 
 </Project>
