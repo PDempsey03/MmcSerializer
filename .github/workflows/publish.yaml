@@ -73,5 +73,7 @@ jobs:
             Published NuGet package for version ${{ github.ref_name }}.
           files: |
             ./artifacts/*.nupkg
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
     
     
