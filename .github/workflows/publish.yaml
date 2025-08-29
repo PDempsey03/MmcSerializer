@@ -50,7 +50,7 @@ jobs:
           uses: actions/upload-artifact@v4
           with:
             name: nuget-package
-            path: MmcSerializer/MmcSerializer/.output/*.nupkg
+            path: ./MmcSerializer/.output/*.nupkg
 
   publish_github_release:
     name: Publish Github Release
