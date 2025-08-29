@@ -16,7 +16,7 @@ jobs:
         
         - name: Set Version
           run: |
-            VERSION=${ GITHUB_REF_NAME#v }
+            VERSION=${GITHUB_REF_NAME#v}
             sed -i -e "s/{{Version}}/${VERSION}/" ./src/MmcSerializer.csproj
         
         - name: Pack
