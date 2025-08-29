@@ -6,7 +6,7 @@ namespace MmcSerializer.Tests;
 [TestClass]
 public class TypeCategoryTests
 {
-    private static TypeCategoryTestClass Test { get; set; }
+    private static TypeCategoryTestClass Test { get; set; } = null!;
 
     [ClassInitialize]
     public static void Setup(TestContext testContext)

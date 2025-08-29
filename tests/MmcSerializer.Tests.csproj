@@ -8,6 +8,10 @@
     <UseVSTest>true</UseVSTest>
   </PropertyGroup>
 
+	<PropertyGroup>
+		<NoWarn>CS0169;CS0649</NoWarn>
+	</PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.2" />
   </ItemGroup>

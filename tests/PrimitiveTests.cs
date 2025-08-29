@@ -9,9 +9,9 @@ namespace MmcSerializer.Tests;
 [TestClass]
 public class PrimitiveTests
 {
-    private static MmcSerializationOptions UniversalMmcOptions;
-    private static XmlWriterSettings XmlWriterSettings;
-    private static XmlReaderSettings XmlReaderSettings;
+    private static MmcSerializationOptions UniversalMmcOptions = null!;
+    private static XmlWriterSettings XmlWriterSettings = null!;
+    private static XmlReaderSettings XmlReaderSettings = null!;
 
     [ClassInitialize]
     public static void SetUp(TestContext context)
