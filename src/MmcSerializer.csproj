@@ -7,7 +7,7 @@
 	<RootNamespace>MmcSerializer</RootNamespace>
 
 	  <PackageId>MmcSerializer</PackageId>
-	  <Version>1.0.0-alpha.1</Version>
+	  <Version>{{Version}}</Version>
 	  <Authors>Patrick Dempsey</Authors>
 	  <Company>Mmc</Company>
 	  <Product>MmcSolutions</Product>
