@@ -69,14 +69,14 @@ jobs:
         run: |
             ls -l ./artifacts
 
-      #- name: Create GitHub Release
-      #  uses: softprops/action-gh-release@v1
-      #  with:
-      #    tag_name: ${{ github.ref_name }}
-      #    name: Release ${{ github.ref_name }}
-      #    body: |
-      #      Published NuGet package for version ${{ github.ref_name }}.
-      #    files: |
-      #      ./artifacts/*.nupkg
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body: |
+            Published NuGet package for version ${{ github.ref_name }}.
+          files: |
+            ./artifacts/*.nupkg
     
     
