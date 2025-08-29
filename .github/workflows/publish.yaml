@@ -18,7 +18,7 @@ jobs:
           dotnet-version: '8.0.x'
           
       - name: Run MSTest
-        run: dotnet test ./tests/MmcSerializer.Tests.csproj -configuration Release --verbosity normal /p:Version=${GITHUB_REF_NAME#v}
+        run: dotnet test ./tests/MmcSerializer.Tests.csproj --configuration Release --verbosity normal /p:Version=${GITHUB_REF_NAME#v}
     
   publish_nuget_package:
     name: Publish Nuget Package
