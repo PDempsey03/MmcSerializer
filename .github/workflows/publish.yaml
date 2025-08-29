@@ -38,7 +38,6 @@ jobs:
         - name: Pack
           run: |
             dotnet pack ./src/MmcSerializer.csproj -c Release -o ./artifacts
-            ls -l .output/
         
         #- name: Publish
         #  env: 
@@ -64,11 +63,7 @@ jobs:
         with:
           name: nuget-package
           path: ./artifacts
-
-      - name: Check Artifact Path
-        run: |
-            ls -l ./artifacts
-
+          
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
