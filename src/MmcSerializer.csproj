@@ -5,6 +5,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	<RootNamespace>MmcSerializer</RootNamespace>
+
+	  <PackageId>MmcSerializer</PackageId>
+	  <Version>1.0.0-alpha.1</Version>
+	  <Authors>Patrick Dempsey</Authors>
+	  <Company>Mmc</Company>
+	  <Product>MmcSolutions</Product>
   </PropertyGroup>
 
 </Project>
