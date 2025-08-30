@@ -73,6 +73,7 @@ jobs:
             Published NuGet package for version ${{ github.ref_name }}.
           files: |
             ./artifacts/*.nupkg
+          prerelease: ${{ contains(github.ref_name, '-alpha') }}
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
     
