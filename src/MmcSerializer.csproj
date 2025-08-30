@@ -12,10 +12,22 @@
 	  <Company>Mmc</Company>
 	  <Product>MmcSolutions</Product>
 	  <PackageReadmeFile>README.md</PackageReadmeFile>
+	  <Description>
+		  A WIP adapter-based serialization library for .NET.
+		  The goal is to be able to support any file format via the adapter based system.
+		  It uses a tree data structure as the abstraction layer between reflection and file specific details.
+	  </Description>
+	  <PackageTags>serializer;serialization;json;xml;dotnet</PackageTags>
+	  <PackageProjectUrl>https://github.com/PDempsey03/MmcSerializer</PackageProjectUrl>
+	  <RepositoryUrl>https://github.com/PDempsey03/MmcSerializer</RepositoryUrl>
+	  <RepositoryType>git</RepositoryType>
+	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
+	  <PackageIcon>nuget_icon.png</PackageIcon>
   </PropertyGroup>
 
 	<ItemGroup>
 		<None Include="README.md" Pack="true" PackagePath="" />
+		<None Include="nuget_icon.png" Pack="true" PackagePath="" />
 	</ItemGroup>
 
 </Project>
