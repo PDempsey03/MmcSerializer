@@ -1,6 +1,5 @@
 using MmcSerializer.Adapters;
-using MmcSerializer.Tests.Models.Primitive;
-using System.Diagnostics;
+using MmcSerializer.Tests.Models.ClassBased.Primitive;
 using System.Text;
 using System.Xml;
 
@@ -74,8 +73,6 @@ public class PrimitiveTests
         xmlSerializer.Serialize(multiPrimitive);
 
         string resultText = xmlStringBuilder.ToString();
-
-        Debug.WriteLine(resultText);
 
         Assert.IsTrue(resultText.Length > 0);
 

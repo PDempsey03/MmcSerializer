@@ -1,6 +1,6 @@
 ﻿using MmcSerializer.Attributes;
 
-namespace MmcSerializer.Tests.Models.Primitive
+namespace MmcSerializer.Tests.Models.ClassBased.Primitive
 {
     public class IntegersOnly
     {

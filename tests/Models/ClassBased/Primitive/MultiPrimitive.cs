@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace MmcSerializer.Tests.Models.Primitive
+namespace MmcSerializer.Tests.Models.ClassBased.Primitive
 {
     public class MultiPrimitive
     {
