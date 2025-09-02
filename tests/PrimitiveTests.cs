@@ -86,4 +86,33 @@ public class PrimitiveTests
 
         Assert.IsTrue(deserializedClassMatches, "Xml serializer failed");
     }
+
+    [TestMethod]
+    public void TestXmlAllNullablePrimitives()
+    {
+        var xmlStringBuilder = new StringBuilder();
+        var xmlAdapter = new XmlSerializerAdapter()
+        {
+            XmlWriter = XmlWriter.Create(xmlStringBuilder, XmlWriterSettings),
+        };
+        var xmlSerializer = new MmcSerializer(xmlAdapter, UniversalMmcOptions);
+
+        var nullableMultiPrimitive = new NullableMultiPrimitive();
+
+        xmlSerializer.Serialize(nullableMultiPrimitive);
+
+        string resultText = xmlStringBuilder.ToString();
+
+        Assert.IsTrue(resultText.Length > 0);
+
+        xmlAdapter.XmlReader = XmlReader.Create(new StringReader(resultText), XmlReaderSettings);
+
+        var deserializedIntOnly = (NullableMultiPrimitive?)xmlSerializer.Deserialize();
+
+        Assert.IsNotNull(deserializedIntOnly, "Deserialize int only class was null");
+
+        bool deserializedClassMatches = nullableMultiPrimitive.Equals(deserializedIntOnly);
+
+        Assert.IsTrue(deserializedClassMatches, "Xml serializer failed");
+    }
 }

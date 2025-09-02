@@ -102,8 +102,11 @@ namespace MmcSerializer
                     break;
 
                 case TypeCategory.Primitive:
-                case TypeCategory.NullablePrimitive:
                     SerializePrimitiveType(name, value, type, typeCategory, parentNode);
+                    break;
+
+                case TypeCategory.NullablePrimitive:
+                    SerializePrimitiveType(name, value, Nullable.GetUnderlyingType(type) ?? type, typeCategory, parentNode);
                     break;
             }
         }
@@ -305,6 +308,10 @@ namespace MmcSerializer
                 }
 
                 setter.Invoke([convertedType]);
+            }
+            else if (currentNode.Value is null)
+            {
+                setter.Invoke([null]);
             }
         }
 
