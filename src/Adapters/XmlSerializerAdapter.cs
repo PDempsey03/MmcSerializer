@@ -33,12 +33,11 @@ namespace MmcSerializer.Adapters
             if (nextNode == null && IsTypeCatgoryValidForValue(rootNode.TypeCategory))
             {
                 object? value = rootNode.Value;
-                if (value == null) XmlWriter.WriteAttributeString(IsNullAttribute, (value == null).ToString().ToLower());
 
-                if (value != null)
-                {
+                if (value == null)
+                    XmlWriter.WriteAttributeString(IsNullAttribute, true.ToString().ToLower());
+                else
                     XmlWriter.WriteString(value.ToString());
-                }
             }
             else
             {
@@ -58,6 +57,7 @@ namespace MmcSerializer.Adapters
         {
             ArgumentNullException.ThrowIfNull(XmlReader, nameof(XmlReader));
 
+            // skip to the first element to serialize
             while (XmlReader.NodeType != XmlNodeType.Element)
                 XmlReader.Read();
 

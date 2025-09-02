@@ -57,4 +57,36 @@ public class StringTests
 
         Assert.IsTrue(deserializedClassMatches, "Xml serializer failed");
     }
+
+    [TestMethod]
+    public void TestXmlStringsOnlyWithNulls()
+    {
+        var xmlStringBuilder = new StringBuilder();
+        var xmlAdapter = new XmlSerializerAdapter()
+        {
+            XmlWriter = XmlWriter.Create(xmlStringBuilder, XmlWriterSettings),
+        };
+        var xmlSerializer = new MmcSerializer(xmlAdapter, UniversalMmcOptions);
+
+        var stringsOnly = new StringsOnly();
+        ClassRandomizer.RandomizeClassFieldAndProperties(stringsOnly);
+        stringsOnly.PropertyString = null;
+        stringsOnly._stringField = null;
+
+        xmlSerializer.Serialize(stringsOnly);
+
+        string resultText = xmlStringBuilder.ToString();
+
+        Assert.IsTrue(resultText.Length > 0);
+
+        xmlAdapter.XmlReader = XmlReader.Create(new StringReader(resultText), XmlReaderSettings);
+
+        var deserializedStringsOnly = (StringsOnly?)xmlSerializer.Deserialize();
+
+        Assert.IsNotNull(deserializedStringsOnly, "Deserialize strings only class was null");
+
+        bool deserializedClassMatches = stringsOnly.Equals(deserializedStringsOnly);
+
+        Assert.IsTrue(deserializedClassMatches, "Xml serializer failed");
+    }
 }
