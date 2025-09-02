@@ -4,7 +4,7 @@ namespace MmcSerializer.Tests
 {
     public static class ClassRandomizer
     {
-        public static void RandomizeClassFieldAndPropertyPrimitives<T>(T obj) where T : class
+        public static void RandomizeClassFieldAndProperties<T>(T obj) where T : class
         {
             Random rng = new Random();
 
@@ -27,6 +27,7 @@ namespace MmcSerializer.Tests
                     Type t when t == typeof(ulong) => (ulong)(rng.NextDouble() * ulong.MaxValue),
                     Type t when t == typeof(short) => (short)rng.Next(short.MinValue, short.MaxValue + 1),
                     Type t when t == typeof(ushort) => (ushort)rng.Next(ushort.MinValue, ushort.MaxValue + 1),
+                    Type t when t == typeof(string) => new string([.. Enumerable.Range(0, rng.Next(5, 20)).Select(_ => (char)rng.Next('a', 'z' + 1))]),
                     _ => field.GetValue(obj)! // if not primitive type, leave untouched
                 };
 
@@ -52,6 +53,7 @@ namespace MmcSerializer.Tests
                     Type t when t == typeof(ulong) => (ulong)(rng.NextDouble() * ulong.MaxValue),
                     Type t when t == typeof(short) => (short)rng.Next(short.MinValue, short.MaxValue + 1),
                     Type t when t == typeof(ushort) => (ushort)rng.Next(ushort.MinValue, ushort.MaxValue + 1),
+                    Type t when t == typeof(string) => new string([.. Enumerable.Range(0, rng.Next(5, 20)).Select(_ => (char)rng.Next('a', 'z' + 1))]),
                     _ => property.GetValue(obj)! // if not primitive type, leave untouched
                 };
 

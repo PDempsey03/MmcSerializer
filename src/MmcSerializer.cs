@@ -97,6 +97,10 @@ namespace MmcSerializer
                     SerializeClassType(name, value, type, parentNode);
                     break;
 
+                case TypeCategory.String:
+                    SerializeStringType(name, value, type, parentNode);
+                    break;
+
                 case TypeCategory.Primitive:
                 case TypeCategory.NullablePrimitive:
                     SerializePrimitiveType(name, value, type, typeCategory, parentNode);
@@ -122,6 +126,13 @@ namespace MmcSerializer
             {
                 HandlePropertySerialization(propInfo, childNode);
             }
+        }
+
+        protected virtual void SerializeStringType(string name, object? value, Type type, SerializationNode parentNode)
+        {
+            SerializationNode childNode = new SerializationNode(name, value, type, TypeCategory.String);
+
+            parentNode.AddChildNode(childNode);
         }
 
         protected virtual void SerializePrimitiveType(string name, object? value, Type type, TypeCategory typeCategory, SerializationNode parentNode)
@@ -241,6 +252,10 @@ namespace MmcSerializer
                             DeserializeClassType(nextChildNode, currentNode, newSetter);
                             break;
 
+                        case TypeCategory.String:
+                            DeserializeStringType(nextChildNode, currentNode, newSetter);
+                            break;
+
                         case TypeCategory.Primitive:
                         case TypeCategory.NullablePrimitive:
                             DeserializePrimitiveType(nextChildNode, currentNode, newSetter);
@@ -249,6 +264,18 @@ namespace MmcSerializer
                 }
 
                 nextChildNode = currentNode.GetNextChildNode();
+            }
+        }
+
+        protected virtual void DeserializeStringType(SerializationNode currentNode, SerializationNode? parentNode, Action<object?[]?> setter)
+        {
+            if (currentNode.Value is string stringValue)
+            {
+                setter.Invoke([stringValue]);
+            }
+            else if (currentNode.Value is null)
+            {
+                setter.Invoke([null]);
             }
         }
 

@@ -68,7 +68,7 @@ public class PrimitiveTests
         var xmlSerializer = new MmcSerializer(xmlAdapter, UniversalMmcOptions);
 
         var multiPrimitive = new MultiPrimitive();
-        ClassRandomizer.RandomizeClassFieldAndPropertyPrimitives(multiPrimitive);
+        ClassRandomizer.RandomizeClassFieldAndProperties(multiPrimitive);
 
         xmlSerializer.Serialize(multiPrimitive);
 
