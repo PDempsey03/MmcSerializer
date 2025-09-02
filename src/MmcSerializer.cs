@@ -82,8 +82,6 @@ namespace MmcSerializer
 
             object? value = fieldInfo.GetValue(parentNode.Value);
 
-            TypeCategory typeCategory = fieldType.GetTypeCategory();
-
             HandleSerialization(name, value, fieldType, parentNode);
         }
 
