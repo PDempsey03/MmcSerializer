@@ -1,6 +1,5 @@
 using MmcSerializer.Adapters;
 using MmcSerializer.Tests.Models.Strings;
-using System.Diagnostics;
 using System.Text;
 using System.Xml;
 
@@ -45,8 +44,6 @@ public class StringTests
         xmlSerializer.Serialize(stringsOnly);
 
         string resultText = xmlStringBuilder.ToString();
-
-        Debug.WriteLine(resultText);
 
         Assert.IsTrue(resultText.Length > 0);
 
