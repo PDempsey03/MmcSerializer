@@ -1,5 +1,5 @@
 using MmcSerializer.Adapters;
-using MmcSerializer.Tests.Models.Strings;
+using MmcSerializer.Tests.Models.ClassBased.Strings;
 using System.Text;
 using System.Xml;
 

@@ -1,4 +1,4 @@
-﻿namespace MmcSerializer.Tests.Models.Strings
+﻿namespace MmcSerializer.Tests.Models.ClassBased.Strings
 {
     public class StringsOnly
     {
