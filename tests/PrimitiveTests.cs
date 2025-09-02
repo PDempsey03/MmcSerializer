@@ -12,6 +12,8 @@ public class PrimitiveTests
     private static XmlWriterSettings XmlWriterSettings = null!;
     private static XmlReaderSettings XmlReaderSettings = null!;
 
+    public TestContext? TestContext { get; set; }
+
     [ClassInitialize]
     public static void SetUp(TestContext context)
     {
@@ -25,7 +27,7 @@ public class PrimitiveTests
             NewLineChars = Environment.NewLine,
         };
 
-        XmlReaderSettings = new XmlReaderSettings(); ;
+        XmlReaderSettings = new XmlReaderSettings();
     }
 
     [TestMethod]
@@ -43,6 +45,8 @@ public class PrimitiveTests
         xmlSerializer.Serialize(intOnly);
 
         string resultText = xmlStringBuilder.ToString();
+
+        TestContext?.WriteLine($"Serialized XML:\n{resultText}");
 
         Assert.IsTrue(resultText.Length > 0);
 
@@ -74,6 +78,8 @@ public class PrimitiveTests
 
         string resultText = xmlStringBuilder.ToString();
 
+        TestContext?.WriteLine($"Serialized XML:\n{resultText}");
+
         Assert.IsTrue(resultText.Length > 0);
 
         xmlAdapter.XmlReader = XmlReader.Create(new StringReader(resultText), XmlReaderSettings);
@@ -102,6 +108,8 @@ public class PrimitiveTests
         xmlSerializer.Serialize(nullableMultiPrimitive);
 
         string resultText = xmlStringBuilder.ToString();
+
+        TestContext?.WriteLine($"Serialized XML:\n{resultText}");
 
         Assert.IsTrue(resultText.Length > 0);
 

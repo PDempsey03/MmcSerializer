@@ -12,6 +12,8 @@ public class StringTests
     private static XmlWriterSettings XmlWriterSettings = null!;
     private static XmlReaderSettings XmlReaderSettings = null!;
 
+    public TestContext? TestContext { get; set; }
+
     [ClassInitialize]
     public static void SetUp(TestContext context)
     {
@@ -45,6 +47,8 @@ public class StringTests
 
         string resultText = xmlStringBuilder.ToString();
 
+        TestContext?.WriteLine($"Serialized XML:\n{resultText}");
+
         Assert.IsTrue(resultText.Length > 0);
 
         xmlAdapter.XmlReader = XmlReader.Create(new StringReader(resultText), XmlReaderSettings);
@@ -76,6 +80,8 @@ public class StringTests
         xmlSerializer.Serialize(stringsOnly);
 
         string resultText = xmlStringBuilder.ToString();
+
+        TestContext?.WriteLine($"Serialized XML:\n{resultText}");
 
         Assert.IsTrue(resultText.Length > 0);
 
