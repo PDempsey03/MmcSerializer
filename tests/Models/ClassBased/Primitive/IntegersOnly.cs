@@ -39,10 +39,7 @@ namespace MmcSerializer.Tests.Models.ClassBased.Primitive
 
         public override bool Equals(object? obj)
         {
-            if (obj is null || obj is not IntegersOnly other) return false;
-
-            return _integerField == other._integerField && IntegerProperty == other.IntegerProperty
-                && _privateIntegerField == other._privateIntegerField && PrivateIntegerProperty == other.PrivateIntegerProperty;
+            return ClassEquals.AreClassesEqualFromFieldsAndProperties(this, obj);
         }
     }
 }

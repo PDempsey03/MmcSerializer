@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace MmcSerializer.Tests.Models.ClassBased.Primitive
+﻿namespace MmcSerializer.Tests.Models.ClassBased.Primitive
 {
     public class MultiPrimitive
     {
@@ -118,33 +116,7 @@ namespace MmcSerializer.Tests.Models.ClassBased.Primitive
 
         public override bool Equals(object? obj)
         {
-            if (obj is null || obj is not MultiPrimitive other) return false;
-
-            // use reflection to auto check every property rather than manually checking everything
-
-            var fields = GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-            foreach (var field in fields)
-            {
-                var thisValue = field.GetValue(this);
-                var otherValue = field.GetValue(other);
-
-                if (!Equals(thisValue, otherValue))
-                    return false;
-            }
-
-            var properties = GetType().GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-            foreach (var prop in properties)
-            {
-                if (!prop.CanRead) continue;
-
-                var thisValue = prop.GetValue(this);
-                var otherValue = prop.GetValue(other);
-
-                if (!Equals(thisValue, otherValue))
-                    return false;
-            }
-
-            return true;
+            return ClassEquals.AreClassesEqualFromFieldsAndProperties(this, obj);
         }
     }
 }
