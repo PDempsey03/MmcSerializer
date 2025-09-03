@@ -11,7 +11,7 @@ namespace MmcSerializer.Tests
             var fields = typeof(T).GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             foreach (var field in fields)
             {
-                object value = field.FieldType switch
+                object? value = field.FieldType switch
                 {
                     Type t when t == typeof(bool) => rng.Next(2) == 0,
                     Type t when t == typeof(byte) => (byte)rng.Next(byte.MinValue, byte.MaxValue + 1),
@@ -28,6 +28,7 @@ namespace MmcSerializer.Tests
                     Type t when t == typeof(short) => (short)rng.Next(short.MinValue, short.MaxValue + 1),
                     Type t when t == typeof(ushort) => (ushort)rng.Next(ushort.MinValue, ushort.MaxValue + 1),
                     Type t when t == typeof(string) => new string([.. Enumerable.Range(0, rng.Next(5, 20)).Select(_ => (char)rng.Next('a', 'z' + 1))]),
+                    Type t when t == typeof(Enum) => Enum.GetValues(t).GetValue(rng.Next(Enum.GetValues(t).Length)),
                     _ => field.GetValue(obj)! // if not primitive type, leave untouched
                 };
 
@@ -37,7 +38,7 @@ namespace MmcSerializer.Tests
             var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             foreach (var property in properties)
             {
-                object value = property.PropertyType switch
+                object? value = property.PropertyType switch
                 {
                     Type t when t == typeof(bool) => rng.Next(2) == 0,
                     Type t when t == typeof(byte) => (byte)rng.Next(byte.MinValue, byte.MaxValue + 1),
@@ -54,6 +55,7 @@ namespace MmcSerializer.Tests
                     Type t when t == typeof(short) => (short)rng.Next(short.MinValue, short.MaxValue + 1),
                     Type t when t == typeof(ushort) => (ushort)rng.Next(ushort.MinValue, ushort.MaxValue + 1),
                     Type t when t == typeof(string) => new string([.. Enumerable.Range(0, rng.Next(5, 20)).Select(_ => (char)rng.Next('a', 'z' + 1))]),
+                    Type t when t == typeof(Enum) => Enum.GetValues(t).GetValue(rng.Next(Enum.GetValues(t).Length)),
                     _ => property.GetValue(obj)! // if not primitive type, leave untouched
                 };
 
