@@ -45,7 +45,7 @@ namespace MmcSerializer
 
             var nodeName = type.Name;
 
-            SerializationNode rootNode = new SerializationNode(nodeName, o, type, type.GetTypeCategory());
+            SerializationNode rootNode = new SerializationNode(nodeName, o, type, typeCategory);
 
             var propInfos = GetValidPropertiesForObjectSerialization(o);
             var fieldInfos = GetValidFieldsForObjectSerialization(o);
