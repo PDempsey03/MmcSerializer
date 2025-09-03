@@ -45,7 +45,7 @@ namespace MmcSerializer
 
             var nodeName = type.Name;
 
-            SerializationNode rootNode = new SerializationNode(nodeName, o, type, type.GetTypeCategory());
+            SerializationNode rootNode = new SerializationNode(nodeName, o, type, typeCategory);
 
             var propInfos = GetValidPropertiesForObjectSerialization(o);
             var fieldInfos = GetValidFieldsForObjectSerialization(o);
@@ -99,6 +99,14 @@ namespace MmcSerializer
                     SerializeStringType(name, value, type, parentNode);
                     break;
 
+                case TypeCategory.Enum:
+                    SerializeEnumType(name, value, type, typeCategory, parentNode);
+                    break;
+
+                case TypeCategory.NullableEnum:
+                    SerializeEnumType(name, value, Nullable.GetUnderlyingType(type) ?? type, typeCategory, parentNode);
+                    break;
+
                 case TypeCategory.Primitive:
                     SerializePrimitiveType(name, value, type, typeCategory, parentNode);
                     break;
@@ -130,6 +138,13 @@ namespace MmcSerializer
         }
 
         protected virtual void SerializeStringType(string name, object? value, Type type, SerializationNode parentNode)
+        {
+            SerializationNode childNode = new SerializationNode(name, value, type, TypeCategory.String);
+
+            parentNode.AddChildNode(childNode);
+        }
+
+        protected virtual void SerializeEnumType(string name, object? value, Type type, TypeCategory typeCategory, SerializationNode parentNode)
         {
             SerializationNode childNode = new SerializationNode(name, value, type, TypeCategory.String);
 
@@ -257,6 +272,11 @@ namespace MmcSerializer
                             DeserializeStringType(nextChildNode, currentNode, newSetter);
                             break;
 
+                        case TypeCategory.Enum:
+                        case TypeCategory.NullableEnum:
+                            DeserializeEnumType(nextChildNode, currentNode, newSetter);
+                            break;
+
                         case TypeCategory.Primitive:
                         case TypeCategory.NullablePrimitive:
                             DeserializePrimitiveType(nextChildNode, currentNode, newSetter);
@@ -277,6 +297,17 @@ namespace MmcSerializer
             else if (currentNode.Value is null)
             {
                 setter.Invoke([null]);
+            }
+        }
+
+        protected virtual void DeserializeEnumType(SerializationNode currentNode, SerializationNode? parentNode, Action<object?[]?> setter)
+        {
+            Type enumType = currentNode.Type;
+            string enumString = currentNode.Value?.ToString() ?? string.Empty;
+
+            if (Enum.TryParse(enumType, enumString, true, out object? result))
+            {
+                setter.Invoke([result]);
             }
         }
 
