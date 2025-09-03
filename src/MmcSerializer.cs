@@ -272,6 +272,11 @@ namespace MmcSerializer
                             DeserializeStringType(nextChildNode, currentNode, newSetter);
                             break;
 
+                        case TypeCategory.Enum:
+                        case TypeCategory.NullableEnum:
+                            DeserializeEnumType(nextChildNode, currentNode, newSetter);
+                            break;
+
                         case TypeCategory.Primitive:
                         case TypeCategory.NullablePrimitive:
                             DeserializePrimitiveType(nextChildNode, currentNode, newSetter);

@@ -28,7 +28,7 @@ namespace MmcSerializer.Tests
                     Type t when t == typeof(short) => (short)rng.Next(short.MinValue, short.MaxValue + 1),
                     Type t when t == typeof(ushort) => (ushort)rng.Next(ushort.MinValue, ushort.MaxValue + 1),
                     Type t when t == typeof(string) => new string([.. Enumerable.Range(0, rng.Next(5, 20)).Select(_ => (char)rng.Next('a', 'z' + 1))]),
-                    Type t when t == typeof(Enum) => Enum.GetValues(t).GetValue(rng.Next(Enum.GetValues(t).Length)),
+                    Type t when t.IsEnum => Enum.GetValues(t).GetValue(rng.Next(Enum.GetValues(t).Length)),
                     _ => field.GetValue(obj)! // if not primitive type, leave untouched
                 };
 
@@ -55,7 +55,7 @@ namespace MmcSerializer.Tests
                     Type t when t == typeof(short) => (short)rng.Next(short.MinValue, short.MaxValue + 1),
                     Type t when t == typeof(ushort) => (ushort)rng.Next(ushort.MinValue, ushort.MaxValue + 1),
                     Type t when t == typeof(string) => new string([.. Enumerable.Range(0, rng.Next(5, 20)).Select(_ => (char)rng.Next('a', 'z' + 1))]),
-                    Type t when t == typeof(Enum) => Enum.GetValues(t).GetValue(rng.Next(Enum.GetValues(t).Length)),
+                    Type t when t.IsEnum => Enum.GetValues(t).GetValue(rng.Next(Enum.GetValues(t).Length)),
                     _ => property.GetValue(obj)! // if not primitive type, leave untouched
                 };
 
