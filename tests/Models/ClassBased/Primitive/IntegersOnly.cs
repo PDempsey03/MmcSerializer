@@ -34,7 +34,7 @@ namespace MmcSerializer.Tests.Models.ClassBased.Primitive
 
         public override string ToString()
         {
-            return $"_integerField = {_integerField}\nIntegerProperty = {IntegerProperty}";
+            return ClassToString.GetObjectToStringFromFieldAndProperties(this);
         }
 
         public override bool Equals(object? obj)

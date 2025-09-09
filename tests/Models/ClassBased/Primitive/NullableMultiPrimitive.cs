@@ -118,5 +118,10 @@
         {
             return ClassEquals.AreClassesEqualFromFieldsAndProperties(this, obj);
         }
+
+        public override string ToString()
+        {
+            return ClassToString.GetObjectToStringFromFieldAndProperties(this);
+        }
     }
 }
