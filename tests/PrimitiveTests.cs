@@ -40,7 +40,8 @@ public class PrimitiveTests
         };
         var xmlSerializer = new MmcSerializer(xmlAdapter, UniversalMmcOptions);
 
-        var intOnly = new IntegersOnly(12, 20, 300, 5432678);
+        var intOnly = new IntegersOnly();
+        ClassRandomizer.RandomizeClassFieldAndProperties(intOnly);
 
         xmlSerializer.Serialize(intOnly);
 
