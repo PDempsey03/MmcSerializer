@@ -94,7 +94,7 @@ public class StructTests
     }
 
     [TestMethod]
-    public void TestXmlStructOnlyInSruct()
+    public void TestXmlStructOnlyInStruct()
     {
         var xmlStringBuilder = new StringBuilder();
         var xmlAdapter = new XmlSerializerAdapter()
@@ -118,12 +118,41 @@ public class StructTests
 
         var deserializedNestedStructOnly = (NestedStructOnly?)xmlSerializer.Deserialize();
 
-        TestContext?.WriteLine("Original ToString:\n" + nestedStructOnly);
-        TestContext?.WriteLine("Deserialized ToString:\n" + deserializedNestedStructOnly);
-
         Assert.IsNotNull(deserializedNestedStructOnly, "Deserialized object was null");
 
         bool deserializedClassMatches = nestedStructOnly.Equals(deserializedNestedStructOnly);
+
+        Assert.IsTrue(deserializedClassMatches, "Xml serializer failed");
+    }
+
+    [TestMethod]
+    public void TestXmlNestedStructOnlyInStruct()
+    {
+        var xmlStringBuilder = new StringBuilder();
+        var xmlAdapter = new XmlSerializerAdapter()
+        {
+            XmlWriter = XmlWriter.Create(xmlStringBuilder, XmlWriterSettings),
+        };
+        var xmlSerializer = new MmcSerializer(xmlAdapter, UniversalMmcOptions);
+
+        var doubleNestedStructOnly = new DoubleNestedStructOnly();
+        ClassRandomizer.RandomizeStructFieldAndProperties(ref doubleNestedStructOnly);
+
+        xmlSerializer.Serialize(doubleNestedStructOnly);
+
+        string resultText = xmlStringBuilder.ToString();
+
+        TestContext?.WriteLine($"Serialized XML:\n{resultText}");
+
+        Assert.IsTrue(resultText.Length > 0);
+
+        xmlAdapter.XmlReader = XmlReader.Create(new StringReader(resultText), XmlReaderSettings);
+
+        var deserializedDoubleNestedStructOnly = (DoubleNestedStructOnly?)xmlSerializer.Deserialize();
+
+        Assert.IsNotNull(deserializedDoubleNestedStructOnly, "Deserialized object was null");
+
+        bool deserializedClassMatches = doubleNestedStructOnly.Equals(deserializedDoubleNestedStructOnly);
 
         Assert.IsTrue(deserializedClassMatches, "Xml serializer failed");
     }
