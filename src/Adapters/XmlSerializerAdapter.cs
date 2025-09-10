@@ -30,7 +30,7 @@ namespace MmcSerializer.Adapters
 
             SerializationNode? nextNode = rootNode.GetNextChildNode();
 
-            if (nextNode == null && IsTypeCatgoryValidForValue(rootNode.TypeCategory))
+            if (nextNode == null && (IsTypeCatgoryValidForValue(rootNode.TypeCategory) || rootNode.Value == null))
             {
                 object? value = rootNode.Value;
 
