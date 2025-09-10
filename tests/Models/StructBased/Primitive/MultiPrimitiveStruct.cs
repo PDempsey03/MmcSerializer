@@ -1,6 +1,6 @@
-﻿namespace MmcSerializer.Tests.Models.ClassBased.Primitive
+﻿namespace MmcSerializer.Tests.Models.StructBased.Primitive
 {
-    public class MultiPrimitive
+    public struct MultiPrimitiveStruct
     {
         public bool _boolField;
 

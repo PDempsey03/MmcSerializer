@@ -19,6 +19,11 @@ namespace MmcSerializer
         public object? Value { get; set; }
 
         /// <summary>
+        /// Determines whether value just hasn't been instantiated yet or if it is actually null
+        /// </summary>
+        public bool TrueValueIsNull { get; set; }
+
+        /// <summary>
         /// Type associated with the Value.
         /// </summary>
         public Type Type { get; set; }

@@ -1,6 +1,6 @@
-﻿namespace MmcSerializer.Tests.Models.ClassBased.Primitive
+﻿namespace MmcSerializer.Tests.Models.StructBased.Primitive
 {
-    public class NullableMultiPrimitive
+    public struct NullableMultiPrimitiveStruct
     {
         public bool? _boolField = null;
 
@@ -113,6 +113,11 @@
         private short? PrivateShortProperty { get; set; } = null;
 
         private ushort? PrivateUshortProperty { get; set; } = null;
+
+        public NullableMultiPrimitiveStruct()
+        {
+
+        }
 
         public override bool Equals(object? obj)
         {

@@ -30,7 +30,7 @@ namespace MmcSerializer.Adapters
 
             SerializationNode? nextNode = rootNode.GetNextChildNode();
 
-            if (nextNode == null && IsTypeCatgoryValidForValue(rootNode.TypeCategory))
+            if (nextNode == null && (IsTypeCatgoryValidForValue(rootNode.TypeCategory) || rootNode.Value == null))
             {
                 object? value = rootNode.Value;
 
@@ -72,7 +72,10 @@ namespace MmcSerializer.Adapters
 
             if (isNull) typeCategory = typeCategory.ToNullable();
 
-            var currentNode = new SerializationNode(name, null, type, typeCategory);
+            var currentNode = new SerializationNode(name, null, type, typeCategory)
+            {
+                TrueValueIsNull = isNull,
+            };
 
             bool isEmpty = XmlReader.IsEmptyElement;
             XmlReader.Read(); // move inside

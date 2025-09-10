@@ -1,13 +1,14 @@
 using MmcSerializer.Adapters;
-using MmcSerializer.Tests.Models.ClassBased.Primitive;
-using MmcSerializer.Tests.Models.StructBased.Primitive;
+using MmcSerializer.Tests.Models.ClassBased.Structs;
+using MmcSerializer.Tests.Models.StructBased.Classes;
+using MmcSerializer.Tests.Models.StructBased.Structs;
 using System.Text;
 using System.Xml;
 
 namespace MmcSerializer.Tests;
 
 [TestClass]
-public class PrimitiveTests
+public class StructTests
 {
     private static MmcSerializationOptions UniversalMmcOptions = null!;
     private static XmlWriterSettings XmlWriterSettings = null!;
@@ -32,7 +33,7 @@ public class PrimitiveTests
     }
 
     [TestMethod]
-    public void TestXmlIntegersOnlyInClass()
+    public void TestXmlStructOnlyInClass()
     {
         var xmlStringBuilder = new StringBuilder();
         var xmlAdapter = new XmlSerializerAdapter()
@@ -41,10 +42,10 @@ public class PrimitiveTests
         };
         var xmlSerializer = new MmcSerializer(xmlAdapter, UniversalMmcOptions);
 
-        var intOnly = new IntegersOnly();
-        ClassRandomizer.RandomizeClassFieldAndProperties(intOnly);
+        var structOnly = new StructOnly();
+        ClassRandomizer.RandomizeClassFieldAndProperties(structOnly);
 
-        xmlSerializer.Serialize(intOnly);
+        xmlSerializer.Serialize(structOnly);
 
         string resultText = xmlStringBuilder.ToString();
 
@@ -54,17 +55,17 @@ public class PrimitiveTests
 
         xmlAdapter.XmlReader = XmlReader.Create(new StringReader(resultText), XmlReaderSettings);
 
-        var deserializedIntOnly = (IntegersOnly?)xmlSerializer.Deserialize();
+        var deserializedStructOnly = (StructOnly?)xmlSerializer.Deserialize();
 
-        Assert.IsNotNull(deserializedIntOnly, "Deserialized object was null");
+        Assert.IsNotNull(deserializedStructOnly, "Deserialized object was null");
 
-        bool deserializedClassMatches = intOnly.Equals(deserializedIntOnly);
+        bool deserializedClassMatches = structOnly.Equals(deserializedStructOnly);
 
         Assert.IsTrue(deserializedClassMatches, "Xml serializer failed");
     }
 
     [TestMethod]
-    public void TestXmlAllPrimitivesInClass()
+    public void TestXmlNullableStructOnlyInClass()
     {
         var xmlStringBuilder = new StringBuilder();
         var xmlAdapter = new XmlSerializerAdapter()
@@ -73,10 +74,9 @@ public class PrimitiveTests
         };
         var xmlSerializer = new MmcSerializer(xmlAdapter, UniversalMmcOptions);
 
-        var multiPrimitive = new MultiPrimitive();
-        ClassRandomizer.RandomizeClassFieldAndProperties(multiPrimitive);
+        var nullableStructOnly = new NullableStructOnly();
 
-        xmlSerializer.Serialize(multiPrimitive);
+        xmlSerializer.Serialize(nullableStructOnly);
 
         string resultText = xmlStringBuilder.ToString();
 
@@ -86,17 +86,17 @@ public class PrimitiveTests
 
         xmlAdapter.XmlReader = XmlReader.Create(new StringReader(resultText), XmlReaderSettings);
 
-        var deserializedAllPrimitives = (MultiPrimitive?)xmlSerializer.Deserialize();
+        var deserializedNullableStructOnly = (NullableStructOnly?)xmlSerializer.Deserialize();
 
-        Assert.IsNotNull(deserializedAllPrimitives, "Deserialized object was null");
+        Assert.IsNotNull(deserializedNullableStructOnly, "Deserialized object was null");
 
-        bool deserializedClassMatches = multiPrimitive.Equals(deserializedAllPrimitives);
+        bool deserializedClassMatches = nullableStructOnly.Equals(deserializedNullableStructOnly);
 
         Assert.IsTrue(deserializedClassMatches, "Xml serializer failed");
     }
 
     [TestMethod]
-    public void TestXmlAllNullablePrimitivesInClass()
+    public void TestXmlStructOnlyInStruct()
     {
         var xmlStringBuilder = new StringBuilder();
         var xmlAdapter = new XmlSerializerAdapter()
@@ -105,9 +105,10 @@ public class PrimitiveTests
         };
         var xmlSerializer = new MmcSerializer(xmlAdapter, UniversalMmcOptions);
 
-        var nullableMultiPrimitive = new NullableMultiPrimitive();
+        var nestedStructOnly = new NestedStructOnly();
+        ClassRandomizer.RandomizeStructFieldAndProperties(ref nestedStructOnly);
 
-        xmlSerializer.Serialize(nullableMultiPrimitive);
+        xmlSerializer.Serialize(nestedStructOnly);
 
         string resultText = xmlStringBuilder.ToString();
 
@@ -117,17 +118,17 @@ public class PrimitiveTests
 
         xmlAdapter.XmlReader = XmlReader.Create(new StringReader(resultText), XmlReaderSettings);
 
-        var deserializedAllNullablePrimitives = (NullableMultiPrimitive?)xmlSerializer.Deserialize();
+        var deserializedNestedStructOnly = (NestedStructOnly?)xmlSerializer.Deserialize();
 
-        Assert.IsNotNull(deserializedAllNullablePrimitives, "Deserialized object was null");
+        Assert.IsNotNull(deserializedNestedStructOnly, "Deserialized object was null");
 
-        bool deserializedClassMatches = nullableMultiPrimitive.Equals(deserializedAllNullablePrimitives);
+        bool deserializedClassMatches = nestedStructOnly.Equals(deserializedNestedStructOnly);
 
         Assert.IsTrue(deserializedClassMatches, "Xml serializer failed");
     }
 
     [TestMethod]
-    public void TestXmlFloatsOnlyInStruct()
+    public void TestXmlNestedStructOnlyInStruct()
     {
         var xmlStringBuilder = new StringBuilder();
         var xmlAdapter = new XmlSerializerAdapter()
@@ -136,10 +137,10 @@ public class PrimitiveTests
         };
         var xmlSerializer = new MmcSerializer(xmlAdapter, UniversalMmcOptions);
 
-        var onlyFloats = new OnlyFloats();
-        ClassRandomizer.RandomizeStructFieldAndProperties(ref onlyFloats);
+        var doubleNestedStructOnly = new DoubleNestedStructOnly();
+        ClassRandomizer.RandomizeStructFieldAndProperties(ref doubleNestedStructOnly);
 
-        xmlSerializer.Serialize(onlyFloats);
+        xmlSerializer.Serialize(doubleNestedStructOnly);
 
         string resultText = xmlStringBuilder.ToString();
 
@@ -149,17 +150,17 @@ public class PrimitiveTests
 
         xmlAdapter.XmlReader = XmlReader.Create(new StringReader(resultText), XmlReaderSettings);
 
-        var deserializedFloatOnly = (OnlyFloats?)xmlSerializer.Deserialize();
+        var deserializedDoubleNestedStructOnly = (DoubleNestedStructOnly?)xmlSerializer.Deserialize();
 
-        Assert.IsNotNull(deserializedFloatOnly, "Deserialized object was null");
+        Assert.IsNotNull(deserializedDoubleNestedStructOnly, "Deserialized object was null");
 
-        bool deserializedClassMatches = onlyFloats.Equals(deserializedFloatOnly);
+        bool deserializedClassMatches = doubleNestedStructOnly.Equals(deserializedDoubleNestedStructOnly);
 
         Assert.IsTrue(deserializedClassMatches, "Xml serializer failed");
     }
 
     [TestMethod]
-    public void TestXmlAllPrimitivesInStruct()
+    public void TestXmlMultiNestedStructInClass()
     {
         var xmlStringBuilder = new StringBuilder();
         var xmlAdapter = new XmlSerializerAdapter()
@@ -168,10 +169,10 @@ public class PrimitiveTests
         };
         var xmlSerializer = new MmcSerializer(xmlAdapter, UniversalMmcOptions);
 
-        var multiPrimitiveStruct = new MultiPrimitiveStruct();
-        ClassRandomizer.RandomizeStructFieldAndProperties(ref multiPrimitiveStruct);
+        var multiNestedStruct = new MultiNestedStruct();
+        ClassRandomizer.RandomizeStructFieldAndProperties(ref multiNestedStruct);
 
-        xmlSerializer.Serialize(multiPrimitiveStruct);
+        xmlSerializer.Serialize(multiNestedStruct);
 
         string resultText = xmlStringBuilder.ToString();
 
@@ -181,17 +182,17 @@ public class PrimitiveTests
 
         xmlAdapter.XmlReader = XmlReader.Create(new StringReader(resultText), XmlReaderSettings);
 
-        var deserializedIntOnly = (MultiPrimitiveStruct?)xmlSerializer.Deserialize();
+        var deserializedNullableStructOnly = (MultiNestedStruct?)xmlSerializer.Deserialize();
 
-        Assert.IsNotNull(deserializedIntOnly, "Deserialized object was null");
+        Assert.IsNotNull(deserializedNullableStructOnly, "Deserialized object was null");
 
-        bool deserializedClassMatches = multiPrimitiveStruct.Equals(deserializedIntOnly);
+        bool deserializedClassMatches = multiNestedStruct.Equals(deserializedNullableStructOnly);
 
         Assert.IsTrue(deserializedClassMatches, "Xml serializer failed");
     }
 
     [TestMethod]
-    public void TestXmlAllNullablePrimitivesInStruct()
+    public void TestXmlClassesInStruct()
     {
         var xmlStringBuilder = new StringBuilder();
         var xmlAdapter = new XmlSerializerAdapter()
@@ -200,9 +201,10 @@ public class PrimitiveTests
         };
         var xmlSerializer = new MmcSerializer(xmlAdapter, UniversalMmcOptions);
 
-        var nullableMultiPrimitiveStruct = new NullableMultiPrimitiveStruct();
+        var classInStruct = new ClassesInStruct();
+        ClassRandomizer.RandomizeStructFieldAndProperties(ref classInStruct);
 
-        xmlSerializer.Serialize(nullableMultiPrimitiveStruct);
+        xmlSerializer.Serialize(classInStruct);
 
         string resultText = xmlStringBuilder.ToString();
 
@@ -212,11 +214,45 @@ public class PrimitiveTests
 
         xmlAdapter.XmlReader = XmlReader.Create(new StringReader(resultText), XmlReaderSettings);
 
-        var deserializedNullableMultiPrimitiveStruct = (NullableMultiPrimitiveStruct?)xmlSerializer.Deserialize();
+        var deserializedClassInStruct = (ClassesInStruct?)xmlSerializer.Deserialize();
 
-        Assert.IsNotNull(deserializedNullableMultiPrimitiveStruct, "Deserialized object was null");
+        Assert.IsNotNull(deserializedClassInStruct, "Deserialized object was null");
 
-        bool deserializedClassMatches = nullableMultiPrimitiveStruct.Equals(deserializedNullableMultiPrimitiveStruct);
+        bool deserializedClassMatches = classInStruct.Equals(deserializedClassInStruct);
+
+        Assert.IsTrue(deserializedClassMatches, "Xml serializer failed");
+    }
+
+    [TestMethod]
+    public void TestXmlNullClassesInStruct()
+    {
+        var xmlStringBuilder = new StringBuilder();
+        var xmlAdapter = new XmlSerializerAdapter()
+        {
+            XmlWriter = XmlWriter.Create(xmlStringBuilder, XmlWriterSettings),
+        };
+        var xmlSerializer = new MmcSerializer(xmlAdapter, UniversalMmcOptions);
+
+        var classInStruct = new ClassesInStruct();
+
+        xmlSerializer.Serialize(classInStruct);
+
+        string resultText = xmlStringBuilder.ToString();
+
+        TestContext?.WriteLine($"Serialized XML:\n{resultText}");
+
+        Assert.IsTrue(resultText.Length > 0);
+
+        xmlAdapter.XmlReader = XmlReader.Create(new StringReader(resultText), XmlReaderSettings);
+
+        var deserializedClassInStruct = (ClassesInStruct?)xmlSerializer.Deserialize();
+
+        TestContext?.WriteLine("Original ToString: " + classInStruct);
+        TestContext?.WriteLine("Deserialized ToString: " + deserializedClassInStruct);
+
+        Assert.IsNotNull(deserializedClassInStruct, "Deserialized object was null");
+
+        bool deserializedClassMatches = classInStruct.Equals(deserializedClassInStruct);
 
         Assert.IsTrue(deserializedClassMatches, "Xml serializer failed");
     }

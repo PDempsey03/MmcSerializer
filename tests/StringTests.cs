@@ -31,7 +31,7 @@ public class StringTests
     }
 
     [TestMethod]
-    public void TestXmlStringsOnly()
+    public void TestXmlStringsOnlyInClass()
     {
         var xmlStringBuilder = new StringBuilder();
         var xmlAdapter = new XmlSerializerAdapter()
@@ -55,7 +55,7 @@ public class StringTests
 
         var deserializedStringsOnly = (StringsOnly?)xmlSerializer.Deserialize();
 
-        Assert.IsNotNull(deserializedStringsOnly, "Deserialize strings only class was null");
+        Assert.IsNotNull(deserializedStringsOnly, "Deserialized object was null");
 
         bool deserializedClassMatches = stringsOnly.Equals(deserializedStringsOnly);
 
@@ -63,7 +63,7 @@ public class StringTests
     }
 
     [TestMethod]
-    public void TestXmlStringsOnlyWithNulls()
+    public void TestXmlStringsOnlyWithNullsInClass()
     {
         var xmlStringBuilder = new StringBuilder();
         var xmlAdapter = new XmlSerializerAdapter()
@@ -89,7 +89,7 @@ public class StringTests
 
         var deserializedStringsOnly = (StringsOnly?)xmlSerializer.Deserialize();
 
-        Assert.IsNotNull(deserializedStringsOnly, "Deserialize strings only class was null");
+        Assert.IsNotNull(deserializedStringsOnly, "Deserialized object was null");
 
         bool deserializedClassMatches = stringsOnly.Equals(deserializedStringsOnly);
 

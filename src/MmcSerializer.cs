@@ -95,6 +95,14 @@ namespace MmcSerializer
                     SerializeClassType(name, value, type, parentNode);
                     break;
 
+                case TypeCategory.Struct:
+                    SerializeStructType(name, value, type, typeCategory, parentNode);
+                    break;
+
+                case TypeCategory.NullableStruct:
+                    SerializeStructType(name, value, Nullable.GetUnderlyingType(type) ?? type, typeCategory, parentNode);
+                    break;
+
                 case TypeCategory.String:
                     SerializeStringType(name, value, type, parentNode);
                     break;
@@ -119,9 +127,39 @@ namespace MmcSerializer
 
         protected virtual void SerializeClassType(string name, object? value, Type type, SerializationNode parentNode)
         {
-            SerializationNode childNode = new SerializationNode(name, value, type, TypeCategory.Class);
+            SerializationNode childNode = new SerializationNode(name, value, type, TypeCategory.Class)
+            {
+                TrueValueIsNull = value == null,
+            };
 
             parentNode.AddChildNode(childNode);
+
+            if (value == null) return;
+
+            var propInfos = GetValidPropertiesForObjectSerialization(value);
+            var fieldInfos = GetValidFieldsForObjectSerialization(value);
+
+            foreach (var fieldInfo in fieldInfos)
+            {
+                HandleFieldSerialization(fieldInfo, childNode);
+            }
+
+            foreach (var propInfo in propInfos)
+            {
+                HandlePropertySerialization(propInfo, childNode);
+            }
+        }
+
+        protected virtual void SerializeStructType(string name, object? value, Type type, TypeCategory typeCategory, SerializationNode parentNode)
+        {
+            SerializationNode childNode = new SerializationNode(name, value, type, typeCategory)
+            {
+                TrueValueIsNull = value == null,
+            };
+
+            parentNode.AddChildNode(childNode);
+
+            if (value == null) return;
 
             var propInfos = GetValidPropertiesForObjectSerialization(value);
             var fieldInfos = GetValidFieldsForObjectSerialization(value);
@@ -139,21 +177,30 @@ namespace MmcSerializer
 
         protected virtual void SerializeStringType(string name, object? value, Type type, SerializationNode parentNode)
         {
-            SerializationNode childNode = new SerializationNode(name, value, type, TypeCategory.String);
+            SerializationNode childNode = new SerializationNode(name, value, type, TypeCategory.String)
+            {
+                TrueValueIsNull = value == null,
+            };
 
             parentNode.AddChildNode(childNode);
         }
 
         protected virtual void SerializeEnumType(string name, object? value, Type type, TypeCategory typeCategory, SerializationNode parentNode)
         {
-            SerializationNode childNode = new SerializationNode(name, value, type, TypeCategory.String);
+            SerializationNode childNode = new SerializationNode(name, value, type, TypeCategory.String)
+            {
+                TrueValueIsNull = value == null,
+            };
 
             parentNode.AddChildNode(childNode);
         }
 
         protected virtual void SerializePrimitiveType(string name, object? value, Type type, TypeCategory typeCategory, SerializationNode parentNode)
         {
-            SerializationNode childNode = new SerializationNode(name, value, type, typeCategory);
+            SerializationNode childNode = new SerializationNode(name, value, type, typeCategory)
+            {
+                TrueValueIsNull = value == null,
+            };
 
             parentNode.AddChildNode(childNode);
         }
@@ -205,9 +252,14 @@ namespace MmcSerializer
                     }
                 });
             }
-            else if (typeCategory == TypeCategory.Struct)
+            else if (typeCategory == TypeCategory.Struct || typeCategory == TypeCategory.NullableStruct)
             {
+                DeserializeStructType(rootNode, null, (parameters) =>
+                {
+                    if (parameters == null || parameters.Length != 1) return;
 
+                    rootNode.Value = parameters[0];
+                });
             }
 
             return rootNode.Value;
@@ -215,6 +267,12 @@ namespace MmcSerializer
 
         protected virtual void DeserializeClassType(SerializationNode currentNode, SerializationNode? parentNode, Action<object?[]?> setter)
         {
+            if (currentNode.TrueValueIsNull)
+            {
+                setter.Invoke([null]);
+                return;
+            }
+
             Type classType = currentNode.Type;
 
             object? instance = Activator.CreateInstance(classType);
@@ -268,6 +326,11 @@ namespace MmcSerializer
                             DeserializeClassType(nextChildNode, currentNode, newSetter);
                             break;
 
+                        case TypeCategory.Struct:
+                        case TypeCategory.NullableStruct:
+                            DeserializeStructType(nextChildNode, currentNode, newSetter);
+                            break;
+
                         case TypeCategory.String:
                             DeserializeStringType(nextChildNode, currentNode, newSetter);
                             break;
@@ -286,6 +349,92 @@ namespace MmcSerializer
 
                 nextChildNode = currentNode.GetNextChildNode();
             }
+        }
+
+        protected virtual void DeserializeStructType(SerializationNode currentNode, SerializationNode? parentNode, Action<object?[]?> setter)
+        {
+            if (currentNode.TrueValueIsNull)
+            {
+                setter.Invoke([null]);
+                return;
+            }
+
+            Type structType = currentNode.Type;
+
+            object? instance = Activator.CreateInstance(structType);
+
+            Dictionary<string, PropertyInfo> propInfos = [];
+            Dictionary<string, FieldInfo> fieldInfos = [];
+
+            foreach (var propInfo in GetValidPropertiesForObjectDeserialization(instance))
+            {
+                var hasCustomName = propInfo.IsDefined(typeof(MmcSerializeAsAttribute), inherit: false);
+
+                var propertyName = propInfo.Name;
+
+                var name = hasCustomName ? propInfo.GetCustomAttribute<MmcSerializeAsAttribute>()?.Name ?? propertyName : propertyName;
+
+                propInfos.Add(name, propInfo);
+            }
+
+            foreach (var fieldInfo in GetValidFieldsForObjectDeserialization(instance))
+            {
+                var hasCustomName = fieldInfo.IsDefined(typeof(MmcSerializeAsAttribute), inherit: false);
+
+                var fieldName = fieldInfo.Name;
+
+                var name = hasCustomName ? fieldInfo.GetCustomAttribute<MmcSerializeAsAttribute>()?.Name ?? fieldName : fieldName;
+
+                fieldInfos.Add(name, fieldInfo);
+            }
+
+            var nextChildNode = currentNode.GetNextChildNode();
+            while (nextChildNode != null)
+            {
+                Action<object?[]?>? newSetter = null;
+
+                if (propInfos.TryGetValue(nextChildNode.Name, out PropertyInfo? propertyInfo))
+                {
+                    newSetter = (parameters) => propertyInfo.SetMethod?.Invoke(instance, parameters);
+                }
+                else if (fieldInfos.TryGetValue(nextChildNode.Name, out FieldInfo? fieldInfo))
+                {
+                    newSetter = (parameters) => fieldInfo.SetValue(instance, parameters?[0] ?? null);
+                }
+
+                if (newSetter != null)
+                {
+                    switch (nextChildNode.TypeCategory)
+                    {
+                        case TypeCategory.Class:
+                            DeserializeClassType(nextChildNode, currentNode, newSetter);
+                            break;
+
+                        case TypeCategory.Struct:
+                        case TypeCategory.NullableStruct:
+                            DeserializeStructType(nextChildNode, currentNode, newSetter);
+                            break;
+
+                        case TypeCategory.String:
+                            DeserializeStringType(nextChildNode, currentNode, newSetter);
+                            break;
+
+                        case TypeCategory.Enum:
+                        case TypeCategory.NullableEnum:
+                            DeserializeEnumType(nextChildNode, currentNode, newSetter);
+                            break;
+
+                        case TypeCategory.Primitive:
+                        case TypeCategory.NullablePrimitive:
+                            DeserializePrimitiveType(nextChildNode, currentNode, newSetter);
+                            break;
+                    }
+                }
+
+                nextChildNode = currentNode.GetNextChildNode();
+            }
+
+            setter.Invoke([instance]);
         }
 
         protected virtual void DeserializeStringType(SerializationNode currentNode, SerializationNode? parentNode, Action<object?[]?> setter)
@@ -367,6 +516,36 @@ namespace MmcSerializer
             var validFields = allFields.Where(f => !f.IsDefined(typeof(CompilerGeneratedAttribute), inherit: false)).ToArray();
 
             return validFields;
+        }
+
+        private static bool ShouldSerialize(MemberInfo memberInfo, MmcSerializationOptions options)
+        {
+            if (memberInfo.IsDefined(typeof(MmcSerializeAsAttribute), inherit: false))
+                return true;
+
+            bool shouldSerialize = memberInfo switch
+            {
+                FieldInfo f => options.FieldSerializationMode switch
+                {
+                    SerializationMode.LabeledOnly => false,
+                    SerializationMode.Public => f.IsPublic,
+                    SerializationMode.PublicAndPrivate => true,
+                    _ => false
+                },
+                PropertyInfo p => options.PropertySerializationMode switch
+                {
+                    SerializationMode.LabeledOnly => false,
+                    SerializationMode.Public => p.GetMethod?.IsPublic == true,
+                    SerializationMode.PublicAndPrivate => true,
+                    _ => false
+                },
+                _ => false
+            };
+
+            if (options.ShouldSerialize != null)
+                shouldSerialize = shouldSerialize && options.ShouldSerialize(memberInfo);
+
+            return shouldSerialize;
         }
     }
 }

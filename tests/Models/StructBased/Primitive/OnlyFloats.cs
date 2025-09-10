@@ -1,20 +1,20 @@
 ﻿using MmcSerializer.Attributes;
 
-namespace MmcSerializer.Tests.Models.ClassBased.Primitive
+namespace MmcSerializer.Tests.Models.StructBased.Primitive
 {
-    public class IntegersOnly
+    public struct OnlyFloats
     {
         [MmcSerializable]
-        public int _integerField;
+        public float _floatField;
 
         [MmcSerializable]
-        private int _privateIntegerField;
+        private float _privateFloatField;
 
         [MmcSerializable]
-        public int IntegerProperty { get; set; }
+        public float FloatProperty { get; set; }
 
         [MmcSerializable]
-        private int PrivateIntegerProperty { get; set; }
+        private float PrivateFloatProperty { get; set; }
 
         public override string ToString()
         {
