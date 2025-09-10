@@ -27,12 +27,14 @@ namespace MmcSerializer.Tests
 
         public static void RandomizeStructFieldAndProperties<T>(ref T obj) where T : struct
         {
+            var boxedCopy = (object)obj;
+
             var fields = typeof(T).GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             foreach (var field in fields)
             {
-                object? value = RandomizeFromType(field.FieldType) ?? field.GetValue(obj);
+                object? value = RandomizeFromType(field.FieldType) ?? field.GetValue(boxedCopy);
 
-                field.SetValue(obj, value);
+                field.SetValue(boxedCopy, value);
             }
 
             var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
@@ -40,10 +42,12 @@ namespace MmcSerializer.Tests
             {
                 if (!property.CanWrite) continue;
 
-                object? value = RandomizeFromType(property.PropertyType) ?? property.GetValue(obj);
+                object? value = RandomizeFromType(property.PropertyType) ?? property.GetValue(boxedCopy);
 
-                property.SetValue(obj, value);
+                property.SetValue(boxedCopy, value);
             }
+
+            obj = (T)boxedCopy;
         }
 
         private static object? RandomizeFromType(Type type)
