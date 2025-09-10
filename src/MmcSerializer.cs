@@ -127,9 +127,14 @@ namespace MmcSerializer
 
         protected virtual void SerializeClassType(string name, object? value, Type type, SerializationNode parentNode)
         {
-            SerializationNode childNode = new SerializationNode(name, value, type, TypeCategory.Class);
+            SerializationNode childNode = new SerializationNode(name, value, type, TypeCategory.Class)
+            {
+                TrueValueIsNull = value == null,
+            };
 
             parentNode.AddChildNode(childNode);
+
+            if (value == null) return;
 
             var propInfos = GetValidPropertiesForObjectSerialization(value);
             var fieldInfos = GetValidFieldsForObjectSerialization(value);
@@ -147,9 +152,14 @@ namespace MmcSerializer
 
         protected virtual void SerializeStructType(string name, object? value, Type type, TypeCategory typeCategory, SerializationNode parentNode)
         {
-            SerializationNode childNode = new SerializationNode(name, value, type, typeCategory);
+            SerializationNode childNode = new SerializationNode(name, value, type, typeCategory)
+            {
+                TrueValueIsNull = value == null,
+            };
 
             parentNode.AddChildNode(childNode);
+
+            if (value == null) return;
 
             var propInfos = GetValidPropertiesForObjectSerialization(value);
             var fieldInfos = GetValidFieldsForObjectSerialization(value);
@@ -167,21 +177,30 @@ namespace MmcSerializer
 
         protected virtual void SerializeStringType(string name, object? value, Type type, SerializationNode parentNode)
         {
-            SerializationNode childNode = new SerializationNode(name, value, type, TypeCategory.String);
+            SerializationNode childNode = new SerializationNode(name, value, type, TypeCategory.String)
+            {
+                TrueValueIsNull = value == null,
+            };
 
             parentNode.AddChildNode(childNode);
         }
 
         protected virtual void SerializeEnumType(string name, object? value, Type type, TypeCategory typeCategory, SerializationNode parentNode)
         {
-            SerializationNode childNode = new SerializationNode(name, value, type, TypeCategory.String);
+            SerializationNode childNode = new SerializationNode(name, value, type, TypeCategory.String)
+            {
+                TrueValueIsNull = value == null,
+            };
 
             parentNode.AddChildNode(childNode);
         }
 
         protected virtual void SerializePrimitiveType(string name, object? value, Type type, TypeCategory typeCategory, SerializationNode parentNode)
         {
-            SerializationNode childNode = new SerializationNode(name, value, type, typeCategory);
+            SerializationNode childNode = new SerializationNode(name, value, type, typeCategory)
+            {
+                TrueValueIsNull = value == null,
+            };
 
             parentNode.AddChildNode(childNode);
         }
@@ -248,6 +267,12 @@ namespace MmcSerializer
 
         protected virtual void DeserializeClassType(SerializationNode currentNode, SerializationNode? parentNode, Action<object?[]?> setter)
         {
+            if (currentNode.TrueValueIsNull)
+            {
+                setter.Invoke([null]);
+                return;
+            }
+
             Type classType = currentNode.Type;
 
             object? instance = Activator.CreateInstance(classType);
@@ -328,6 +353,12 @@ namespace MmcSerializer
 
         protected virtual void DeserializeStructType(SerializationNode currentNode, SerializationNode? parentNode, Action<object?[]?> setter)
         {
+            if (currentNode.TrueValueIsNull)
+            {
+                setter.Invoke([null]);
+                return;
+            }
+
             Type structType = currentNode.Type;
 
             object? instance = Activator.CreateInstance(structType);
@@ -358,12 +389,6 @@ namespace MmcSerializer
             }
 
             var nextChildNode = currentNode.GetNextChildNode();
-
-            if (nextChildNode == null && currentNode.TypeCategory == TypeCategory.NullableStruct)
-            {
-                instance = null;
-            }
-
             while (nextChildNode != null)
             {
                 Action<object?[]?>? newSetter = null;

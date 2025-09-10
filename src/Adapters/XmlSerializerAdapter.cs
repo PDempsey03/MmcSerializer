@@ -72,7 +72,10 @@ namespace MmcSerializer.Adapters
 
             if (isNull) typeCategory = typeCategory.ToNullable();
 
-            var currentNode = new SerializationNode(name, null, type, typeCategory);
+            var currentNode = new SerializationNode(name, null, type, typeCategory)
+            {
+                TrueValueIsNull = isNull,
+            };
 
             bool isEmpty = XmlReader.IsEmptyElement;
             XmlReader.Read(); // move inside
