@@ -1,5 +1,6 @@
 using MmcSerializer.Adapters;
 using MmcSerializer.Tests.Models.ClassBased.Structs;
+using MmcSerializer.Tests.Models.StructBased.Classes;
 using MmcSerializer.Tests.Models.StructBased.Structs;
 using System.Text;
 using System.Xml;
@@ -186,6 +187,72 @@ public class StructTests
         Assert.IsNotNull(deserializedNullableStructOnly, "Deserialized object was null");
 
         bool deserializedClassMatches = multiNestedStruct.Equals(deserializedNullableStructOnly);
+
+        Assert.IsTrue(deserializedClassMatches, "Xml serializer failed");
+    }
+
+    [TestMethod]
+    public void TestXmlClassesInStruct()
+    {
+        var xmlStringBuilder = new StringBuilder();
+        var xmlAdapter = new XmlSerializerAdapter()
+        {
+            XmlWriter = XmlWriter.Create(xmlStringBuilder, XmlWriterSettings),
+        };
+        var xmlSerializer = new MmcSerializer(xmlAdapter, UniversalMmcOptions);
+
+        var classInStruct = new ClassesInStruct();
+        ClassRandomizer.RandomizeStructFieldAndProperties(ref classInStruct);
+
+        xmlSerializer.Serialize(classInStruct);
+
+        string resultText = xmlStringBuilder.ToString();
+
+        TestContext?.WriteLine($"Serialized XML:\n{resultText}");
+
+        Assert.IsTrue(resultText.Length > 0);
+
+        xmlAdapter.XmlReader = XmlReader.Create(new StringReader(resultText), XmlReaderSettings);
+
+        var deserializedClassInStruct = (ClassesInStruct?)xmlSerializer.Deserialize();
+
+        Assert.IsNotNull(deserializedClassInStruct, "Deserialized object was null");
+
+        bool deserializedClassMatches = classInStruct.Equals(deserializedClassInStruct);
+
+        Assert.IsTrue(deserializedClassMatches, "Xml serializer failed");
+    }
+
+    [TestMethod]
+    public void TestXmlNullClassesInStruct()
+    {
+        var xmlStringBuilder = new StringBuilder();
+        var xmlAdapter = new XmlSerializerAdapter()
+        {
+            XmlWriter = XmlWriter.Create(xmlStringBuilder, XmlWriterSettings),
+        };
+        var xmlSerializer = new MmcSerializer(xmlAdapter, UniversalMmcOptions);
+
+        var classInStruct = new ClassesInStruct();
+
+        xmlSerializer.Serialize(classInStruct);
+
+        string resultText = xmlStringBuilder.ToString();
+
+        TestContext?.WriteLine($"Serialized XML:\n{resultText}");
+
+        Assert.IsTrue(resultText.Length > 0);
+
+        xmlAdapter.XmlReader = XmlReader.Create(new StringReader(resultText), XmlReaderSettings);
+
+        var deserializedClassInStruct = (ClassesInStruct?)xmlSerializer.Deserialize();
+
+        TestContext?.WriteLine("Original ToString: " + classInStruct);
+        TestContext?.WriteLine("Deserialized ToString: " + deserializedClassInStruct);
+
+        Assert.IsNotNull(deserializedClassInStruct, "Deserialized object was null");
+
+        bool deserializedClassMatches = classInStruct.Equals(deserializedClassInStruct);
 
         Assert.IsTrue(deserializedClassMatches, "Xml serializer failed");
     }
