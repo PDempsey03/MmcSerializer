@@ -4,7 +4,7 @@ namespace MmcSerializer.Tests
 {
     public static class ClassRandomizer
     {
-        public static void RandomizeClassFieldAndProperties<T>(T obj) where T : class
+        public static void RandomizeClassFieldAndProperties<T>(T obj)
         {
             var fields = typeof(T).GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             foreach (var field in fields)
@@ -75,8 +75,27 @@ namespace MmcSerializer.Tests
                 Type t when t == typeof(string) => new string([.. Enumerable.Range(0, rng.Next(5, 20)).Select(_ => (char)rng.Next('a', 'z' + 1))]),
                 Type t when t.IsEnum => Enum.GetValues(t).GetValue(rng.Next(Enum.GetValues(t).Length)),
                 Type t when t.IsValueType && !t.IsPrimitive && !t.IsEnum => HandleRandomizeStructFromType(t),
+                // Type t when t.IsArray => 
+                Type t when t.IsClass && !t.IsAbstract => HandleRandomizeClassFromType(t), // TODO: could allow abstract, get classes assignable from, and then pick a random one
                 _ => null
             };
+        }
+
+        private static object? HandleRandomizeClassFromType(Type type)
+        {
+            var instance = Activator.CreateInstance(type);
+
+            if (instance == null) return null;
+
+            var method = typeof(ClassRandomizer).GetMethod(nameof(RandomizeStructFieldAndProperties), BindingFlags.Public | BindingFlags.Static);
+
+            var genericMethod = method!.MakeGenericMethod(type);
+
+            object[] parameters = [instance];
+
+            genericMethod.Invoke(null, parameters);
+
+            return parameters[0];
         }
 
         private static object? HandleRandomizeStructFromType(Type type)
