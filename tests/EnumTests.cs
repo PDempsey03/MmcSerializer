@@ -31,7 +31,7 @@ public class EnumTests
     }
 
     [TestMethod]
-    public void TestXmlEnumsOnly()
+    public void TestXmlEnumsOnlyInClass()
     {
         var xmlStringBuilder = new StringBuilder();
         var xmlAdapter = new XmlSerializerAdapter()
@@ -55,7 +55,7 @@ public class EnumTests
 
         var deserializedStringsOnly = (EnumsOnly?)xmlSerializer.Deserialize();
 
-        Assert.IsNotNull(deserializedStringsOnly, "Deserialize strings only class was null");
+        Assert.IsNotNull(deserializedStringsOnly, "Deserialized object was null");
 
         bool deserializedClassMatches = enumsOnly.Equals(deserializedStringsOnly);
 
@@ -63,7 +63,7 @@ public class EnumTests
     }
 
     [TestMethod]
-    public void TestXmlEnumsOnlyWithNulls()
+    public void TestXmlEnumsOnlyWithNullsInClass()
     {
         var xmlStringBuilder = new StringBuilder();
         var xmlAdapter = new XmlSerializerAdapter()
@@ -86,7 +86,7 @@ public class EnumTests
 
         var deserializedStringsOnly = (NullableEnumsOnly?)xmlSerializer.Deserialize();
 
-        Assert.IsNotNull(deserializedStringsOnly, "Deserialize strings only class was null");
+        Assert.IsNotNull(deserializedStringsOnly, "Deserialized object was null");
 
         bool deserializedClassMatches = nullableEnumsOnly.Equals(deserializedStringsOnly);
 

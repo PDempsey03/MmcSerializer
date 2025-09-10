@@ -31,7 +31,7 @@ public class PrimitiveTests
     }
 
     [TestMethod]
-    public void TestXmlIntegersOnly()
+    public void TestXmlIntegersOnlyInClass()
     {
         var xmlStringBuilder = new StringBuilder();
         var xmlAdapter = new XmlSerializerAdapter()
@@ -55,7 +55,7 @@ public class PrimitiveTests
 
         var deserializedIntOnly = (IntegersOnly?)xmlSerializer.Deserialize();
 
-        Assert.IsNotNull(deserializedIntOnly, "Deserialize int only class was null");
+        Assert.IsNotNull(deserializedIntOnly, "Deserialized object was null");
 
         bool deserializedClassMatches = intOnly.Equals(deserializedIntOnly);
 
@@ -63,7 +63,7 @@ public class PrimitiveTests
     }
 
     [TestMethod]
-    public void TestXmlAllPrimitives()
+    public void TestXmlAllPrimitivesInClass()
     {
         var xmlStringBuilder = new StringBuilder();
         var xmlAdapter = new XmlSerializerAdapter()
@@ -85,17 +85,17 @@ public class PrimitiveTests
 
         xmlAdapter.XmlReader = XmlReader.Create(new StringReader(resultText), XmlReaderSettings);
 
-        var deserializedIntOnly = (MultiPrimitive?)xmlSerializer.Deserialize();
+        var deserializedAllPrimitives = (MultiPrimitive?)xmlSerializer.Deserialize();
 
-        Assert.IsNotNull(deserializedIntOnly, "Deserialize int only class was null");
+        Assert.IsNotNull(deserializedAllPrimitives, "Deserialized object was null");
 
-        bool deserializedClassMatches = multiPrimitive.Equals(deserializedIntOnly);
+        bool deserializedClassMatches = multiPrimitive.Equals(deserializedAllPrimitives);
 
         Assert.IsTrue(deserializedClassMatches, "Xml serializer failed");
     }
 
     [TestMethod]
-    public void TestXmlAllNullablePrimitives()
+    public void TestXmlAllNullablePrimitivesInClass()
     {
         var xmlStringBuilder = new StringBuilder();
         var xmlAdapter = new XmlSerializerAdapter()
