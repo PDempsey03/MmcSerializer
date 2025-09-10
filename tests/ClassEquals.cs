@@ -6,7 +6,7 @@ namespace MmcSerializer.Tests
     {
         public static bool AreClassesEqualFromFieldsAndProperties(object? obj1, object? obj2)
         {
-            if (obj1 == null || obj2 == null) return false;
+            if (obj1 == null || obj2 == null) return obj1 == null && obj2 == null;
 
             var obj1Type = obj1.GetType();
             var obj2Type = obj2.GetType();
