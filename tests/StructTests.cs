@@ -92,4 +92,39 @@ public class StructTests
 
         Assert.IsTrue(deserializedClassMatches, "Xml serializer failed");
     }
+
+    [TestMethod]
+    public void TestXmlStructOnlyInSruct()
+    {
+        var xmlStringBuilder = new StringBuilder();
+        var xmlAdapter = new XmlSerializerAdapter()
+        {
+            XmlWriter = XmlWriter.Create(xmlStringBuilder, XmlWriterSettings),
+        };
+        var xmlSerializer = new MmcSerializer(xmlAdapter, UniversalMmcOptions);
+
+        var nestedStructOnly = new NestedStructOnly();
+        ClassRandomizer.RandomizeStructFieldAndProperties(ref nestedStructOnly);
+
+        xmlSerializer.Serialize(nestedStructOnly);
+
+        string resultText = xmlStringBuilder.ToString();
+
+        TestContext?.WriteLine($"Serialized XML:\n{resultText}");
+
+        Assert.IsTrue(resultText.Length > 0);
+
+        xmlAdapter.XmlReader = XmlReader.Create(new StringReader(resultText), XmlReaderSettings);
+
+        var deserializedNestedStructOnly = (NestedStructOnly?)xmlSerializer.Deserialize();
+
+        TestContext?.WriteLine("Original ToString:\n" + nestedStructOnly);
+        TestContext?.WriteLine("Deserialized ToString:\n" + deserializedNestedStructOnly);
+
+        Assert.IsNotNull(deserializedNestedStructOnly, "Deserialized object was null");
+
+        bool deserializedClassMatches = nestedStructOnly.Equals(deserializedNestedStructOnly);
+
+        Assert.IsTrue(deserializedClassMatches, "Xml serializer failed");
+    }
 }

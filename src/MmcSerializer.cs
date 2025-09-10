@@ -385,6 +385,11 @@ namespace MmcSerializer
                             DeserializeClassType(nextChildNode, currentNode, newSetter);
                             break;
 
+                        case TypeCategory.Struct:
+                        case TypeCategory.NullableStruct:
+                            DeserializeStructType(nextChildNode, currentNode, newSetter);
+                            break;
+
                         case TypeCategory.String:
                             DeserializeStringType(nextChildNode, currentNode, newSetter);
                             break;
