@@ -25,8 +25,10 @@ namespace MmcSerializer.Tests
             }
         }
 
-        public static void RandomizeStructFieldAndProperties<T>(ref T obj) where T : struct
+        public static void RandomizeStructFieldAndProperties<T>(ref T obj)
         {
+            if (obj == null) return;
+
             var boxedCopy = (object)obj;
 
             var fields = typeof(T).GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
@@ -72,8 +74,26 @@ namespace MmcSerializer.Tests
                 Type t when t == typeof(ushort) => (ushort)rng.Next(ushort.MinValue, ushort.MaxValue + 1),
                 Type t when t == typeof(string) => new string([.. Enumerable.Range(0, rng.Next(5, 20)).Select(_ => (char)rng.Next('a', 'z' + 1))]),
                 Type t when t.IsEnum => Enum.GetValues(t).GetValue(rng.Next(Enum.GetValues(t).Length)),
+                Type t when t.IsValueType && !t.IsPrimitive && !t.IsEnum => HandleRandomizeStructFromType(t),
                 _ => null
             };
+        }
+
+        private static object? HandleRandomizeStructFromType(Type type)
+        {
+            var instance = Activator.CreateInstance(type);
+
+            if (instance == null) return null;
+
+            var method = typeof(ClassRandomizer).GetMethod(nameof(RandomizeStructFieldAndProperties), BindingFlags.Public | BindingFlags.Static);
+
+            var genericMethod = method!.MakeGenericMethod(type);
+
+            object[] parameters = [instance];
+
+            genericMethod.Invoke(null, parameters);
+
+            return parameters[0];
         }
     }
 }
