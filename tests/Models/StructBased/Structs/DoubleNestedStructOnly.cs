@@ -1,4 +1,4 @@
-﻿namespace MmcSerializer.Tests.Models.ClassBased.Structs
+﻿namespace MmcSerializer.Tests.Models.StructBased.Structs
 {
     public struct DoubleNestedStructOnly
     {

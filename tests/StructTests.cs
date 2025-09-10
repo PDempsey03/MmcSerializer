@@ -1,5 +1,6 @@
 using MmcSerializer.Adapters;
 using MmcSerializer.Tests.Models.ClassBased.Structs;
+using MmcSerializer.Tests.Models.StructBased.Structs;
 using System.Text;
 using System.Xml;
 
@@ -153,6 +154,38 @@ public class StructTests
         Assert.IsNotNull(deserializedDoubleNestedStructOnly, "Deserialized object was null");
 
         bool deserializedClassMatches = doubleNestedStructOnly.Equals(deserializedDoubleNestedStructOnly);
+
+        Assert.IsTrue(deserializedClassMatches, "Xml serializer failed");
+    }
+
+    [TestMethod]
+    public void TestXmlMultiNestedStructInClass()
+    {
+        var xmlStringBuilder = new StringBuilder();
+        var xmlAdapter = new XmlSerializerAdapter()
+        {
+            XmlWriter = XmlWriter.Create(xmlStringBuilder, XmlWriterSettings),
+        };
+        var xmlSerializer = new MmcSerializer(xmlAdapter, UniversalMmcOptions);
+
+        var multiNestedStruct = new MultiNestedStruct();
+        ClassRandomizer.RandomizeStructFieldAndProperties(ref multiNestedStruct);
+
+        xmlSerializer.Serialize(multiNestedStruct);
+
+        string resultText = xmlStringBuilder.ToString();
+
+        TestContext?.WriteLine($"Serialized XML:\n{resultText}");
+
+        Assert.IsTrue(resultText.Length > 0);
+
+        xmlAdapter.XmlReader = XmlReader.Create(new StringReader(resultText), XmlReaderSettings);
+
+        var deserializedNullableStructOnly = (MultiNestedStruct?)xmlSerializer.Deserialize();
+
+        Assert.IsNotNull(deserializedNullableStructOnly, "Deserialized object was null");
+
+        bool deserializedClassMatches = multiNestedStruct.Equals(deserializedNullableStructOnly);
 
         Assert.IsTrue(deserializedClassMatches, "Xml serializer failed");
     }
