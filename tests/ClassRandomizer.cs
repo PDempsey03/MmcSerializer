@@ -75,7 +75,7 @@ namespace MmcSerializer.Tests
                 Type t when t == typeof(string) => new string([.. Enumerable.Range(0, rng.Next(5, 20)).Select(_ => (char)rng.Next('a', 'z' + 1))]),
                 Type t when t.IsEnum => Enum.GetValues(t).GetValue(rng.Next(Enum.GetValues(t).Length)),
                 Type t when t.IsValueType && !t.IsPrimitive && !t.IsEnum => HandleRandomizeStructFromType(t),
-                // Type t when t.IsArray => 
+                Type t when t.IsArray => HandleRandomizeArrayFromType(t),
                 Type t when t.IsClass && !t.IsAbstract => HandleRandomizeClassFromType(t), // TODO: could allow abstract, get classes assignable from, and then pick a random one
                 _ => null
             };
@@ -113,6 +113,44 @@ namespace MmcSerializer.Tests
             genericMethod.Invoke(null, parameters);
 
             return parameters[0];
+        }
+
+        private static Array HandleRandomizeArrayFromType(Type type)
+        {
+            var elementType = type.GetElementType() ?? throw new InvalidOperationException("Array has no element type");
+
+            int dimensions = type.GetArrayRank();
+
+            int[] randomDimensionLengths = Enumerable.Range(0, dimensions)
+                .Select(_ => 4)
+                .ToArray();
+
+            Array array = Array.CreateInstance(elementType, randomDimensionLengths);
+
+            int[] indices = new int[dimensions];
+            FillArrayRecursive(array, elementType, indices, 0);
+
+            return array;
+        }
+
+        private static void FillArrayRecursive(Array array, Type elementType, int[] indices, int dimension)
+        {
+            int length = array.GetLength(dimension);
+
+            for (int i = 0; i < length; i++)
+            {
+                indices[dimension] = i;
+
+                if (dimension < array.Rank - 1)
+                {
+                    FillArrayRecursive(array, elementType, indices, dimension + 1);
+                }
+                else
+                {
+                    var value = RandomizeFromType(elementType);
+                    array.SetValue(value, indices);
+                }
+            }
         }
     }
 }
