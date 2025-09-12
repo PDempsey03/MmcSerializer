@@ -8,6 +8,9 @@ namespace MmcSerializer.Tests
     public static class ClassToString
     {
         private const string NullString = "null";
+        private const string ArrayElementStart = "{";
+        private const string ArrayElementEnd = "},";
+        private const string FinalArrayElementEnd = "}";
         private const char IndentationChar = '\t';
 
         public static string GetObjectToStringFromFieldAndProperties(object? obj)
@@ -77,16 +80,40 @@ namespace MmcSerializer.Tests
                 {
                     stringBuilder.AppendLine();
                     Array tempArray = (Array)value;
-                    foreach (var item in tempArray)
-                    {
-                        ConvertObjectToStringFromFieldsAndProperties(item, stringBuilder, newIndentation);
-                    }
+                    PrintRecursive(tempArray, stringBuilder, new int[tempArray.Rank], 0, newIndentation);
                 }
                 else
                 {
                     stringBuilder.AppendLine(value.ToString());
                 }
             }
+        }
+
+        private static void PrintRecursive(Array array, StringBuilder stringBuilder, int[] indices, int dimension, string indentation)
+        {
+            int length = array.GetLength(dimension);
+
+            stringBuilder.Append(indentation);
+            stringBuilder.AppendLine("[");
+
+            string newIndentation = indentation + IndentationChar;
+
+            for (int i = 0; i < length; i++)
+            {
+                indices[dimension] = i;
+
+                if (dimension < array.Rank - 1)
+                {
+                    PrintRecursive(array, stringBuilder, indices, dimension + 1, newIndentation);
+                }
+                else
+                {
+                    stringBuilder.AppendLine(newIndentation + ArrayElementStart);
+                    ConvertObjectToStringFromFieldsAndProperties(array.GetValue(indices), stringBuilder, newIndentation);
+                    stringBuilder.AppendLine(newIndentation + (i == length - 1 ? FinalArrayElementEnd : ArrayElementEnd));
+                }
+            }
+            stringBuilder.AppendLine(indentation + "]");
         }
     }
 }
